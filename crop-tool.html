@@ -1,0 +1,616 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Reference Crop Authoring Tool</title>
+    <style>
+      :root {
+        color-scheme: light;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Manrope", system-ui, sans-serif;
+        background: #f6efe5;
+        color: #1a1a1a;
+      }
+
+      h1,
+      h2 {
+        font-family: "Fraunces", "Times New Roman", serif;
+        margin: 0;
+      }
+
+      .wrap {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 28px 20px 60px;
+      }
+
+      .intro {
+        display: grid;
+        gap: 16px;
+      }
+
+      .panel {
+        background: rgba(255, 255, 255, 0.7);
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        border-radius: 18px;
+        padding: 16px;
+      }
+
+      .frames {
+        display: grid;
+        gap: 16px;
+        margin-top: 18px;
+      }
+
+      @media (min-width: 900px) {
+        .frames {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+
+      .frame-card {
+        display: grid;
+        gap: 12px;
+      }
+
+      .frame {
+        position: relative;
+        border-radius: 16px;
+        border: 1px solid rgba(0, 0, 0, 0.12);
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.6), rgba(244, 232, 219, 0.95));
+        overflow: hidden;
+        aspect-ratio: var(--ratio);
+      }
+
+      .frame img {
+        position: absolute;
+        top: 0;
+        left: 0;
+        transform-origin: top left;
+        user-select: none;
+        -webkit-user-drag: none;
+        cursor: grab;
+      }
+
+      .frame.dragging img {
+        cursor: grabbing;
+      }
+
+      .controls {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        font-size: 13px;
+        color: #4b4b4b;
+      }
+
+      .controls input[type="range"] {
+        width: 160px;
+      }
+
+      .output {
+        margin-top: 24px;
+        display: grid;
+        gap: 16px;
+      }
+
+      textarea {
+        width: 100%;
+        min-height: 180px;
+        resize: vertical;
+        padding: 12px;
+        border-radius: 14px;
+        border: 1px solid rgba(0, 0, 0, 0.12);
+        background: #fff;
+        font-family: "SFMono-Regular", ui-monospace, monospace;
+        font-size: 12px;
+      }
+
+      .preview {
+        display: grid;
+        gap: 12px;
+        align-items: center;
+      }
+
+      .preview-frame {
+        position: relative;
+        width: min(520px, 100%);
+        border-radius: 16px;
+        border: 1px solid rgba(0, 0, 0, 0.12);
+        background: #fff;
+        overflow: hidden;
+      }
+
+      .preview-frame img {
+        position: absolute;
+        top: 0;
+        left: 0;
+        transform-origin: top left;
+      }
+
+      .buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      button {
+        border: none;
+        background: #111;
+        color: #f5efe6;
+        padding: 10px 14px;
+        border-radius: 999px;
+        font-size: 12px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        cursor: pointer;
+      }
+
+      .muted {
+        color: #6b6b6b;
+        font-size: 13px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <section class="intro">
+        <div class="panel">
+          <h1>Reference Crop Authoring</h1>
+          <p class="muted">
+            Upload an image, position it inside each reference frame, and capture the normalized corner
+            data. The preview below demonstrates interpolated crops.
+          </p>
+          <div class="buttons">
+            <input id="imageInput" type="file" accept="image/*" />
+            <button id="resetBtn" type="button">Reset</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="frames" id="frames"></section>
+
+      <section class="output">
+        <div class="panel">
+          <h2>Corner Crop Data (Normalized)</h2>
+          <p class="muted">
+            Each entry stores x1, y1, x2, y2 in 0-1 coordinates relative to the original image.
+          </p>
+          <div class="controls">
+            <label for="filenameBase">Filename base</label>
+            <input id="filenameBase" type="text" placeholder="tattoo-photo.jpg" />
+          </div>
+          <textarea id="output" readonly></textarea>
+          <div class="buttons">
+            <button id="copyBtn" type="button">Copy JSON</button>
+            <button id="copySuffixBtn" type="button">Copy Suffix</button>
+            <button id="copyFilenameBtn" type="button">Copy Filename</button>
+          </div>
+          <p class="muted" id="suffixPreview"></p>
+        </div>
+
+        <div class="panel preview">
+          <h2>Interpolated Preview</h2>
+          <div class="controls">
+            <label for="ratioSlider">Target aspect ratio</label>
+            <input id="ratioSlider" type="range" min="0.6" max="2.4" value="1.2" step="0.01" />
+            <span id="ratioLabel">1.20</span>
+          </div>
+          <div class="preview-frame" id="previewFrame"></div>
+          <div class="muted">
+            Uses the two nearest reference crops and linearly interpolates the crop rectangle.
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <script>
+      const framesConfig = [
+        { id: "square", label: "Square (1:1)", ratio: 1 },
+        { id: "portrait", label: "Portrait (3:4)", ratio: 0.75 },
+        { id: "landscape", label: "Landscape (16:9)", ratio: 16 / 9 },
+        { id: "ultrawide", label: "Ultrawide (21:9)", ratio: 21 / 9 },
+      ].sort((a, b) => a.ratio - b.ratio);
+
+      const state = {
+        image: null,
+        imageUrl: "",
+        natural: { w: 0, h: 0 },
+        frames: {},
+      };
+
+      const framesContainer = document.getElementById("frames");
+      const outputEl = document.getElementById("output");
+      const filenameBase = document.getElementById("filenameBase");
+      const suffixPreview = document.getElementById("suffixPreview");
+      const ratioSlider = document.getElementById("ratioSlider");
+      const ratioLabel = document.getElementById("ratioLabel");
+      const previewFrame = document.getElementById("previewFrame");
+      const copyBtn = document.getElementById("copyBtn");
+      const copySuffixBtn = document.getElementById("copySuffixBtn");
+      const copyFilenameBtn = document.getElementById("copyFilenameBtn");
+      const resetBtn = document.getElementById("resetBtn");
+      const CROP_PREFIX = "__c_";
+      const QUANT_BITS = 12;
+      const QUANT_MAX = (1 << QUANT_BITS) - 1;
+
+      function createFrameCard(config) {
+        const card = document.createElement("div");
+        card.className = "frame-card panel";
+
+        const title = document.createElement("div");
+        title.textContent = config.label;
+        title.style.fontSize = "14px";
+        title.style.letterSpacing = "0.14em";
+        title.style.textTransform = "uppercase";
+        title.style.color = "#4b4b4b";
+
+        const frame = document.createElement("div");
+        frame.className = "frame";
+        frame.style.setProperty("--ratio", config.ratio);
+
+        const img = document.createElement("img");
+        img.alt = "";
+        frame.appendChild(img);
+
+        const controls = document.createElement("div");
+        controls.className = "controls";
+
+        const zoomLabel = document.createElement("label");
+        zoomLabel.textContent = "Zoom";
+
+        const zoomInput = document.createElement("input");
+        zoomInput.type = "range";
+        zoomInput.min = "0.6";
+        zoomInput.max = "2.5";
+        zoomInput.step = "0.01";
+        zoomInput.value = "1";
+
+        const zoomValue = document.createElement("span");
+        zoomValue.textContent = "1.00";
+
+        controls.append(zoomLabel, zoomInput, zoomValue);
+
+        card.append(title, frame, controls);
+
+        framesContainer.appendChild(card);
+
+        state.frames[config.id] = {
+          config,
+          frame,
+          img,
+          zoomInput,
+          zoomValue,
+          transform: { x: 0, y: 0, scale: 1 },
+        };
+
+        bindFrameInteractions(config.id);
+      }
+
+      function bindFrameInteractions(id) {
+        const frameState = state.frames[id];
+        const frame = frameState.frame;
+        const img = frameState.img;
+
+        let isDragging = false;
+        let start = { x: 0, y: 0 };
+        let origin = { x: 0, y: 0 };
+
+        frame.addEventListener("pointerdown", (event) => {
+          if (!state.imageUrl) return;
+          isDragging = true;
+          frame.classList.add("dragging");
+          start = { x: event.clientX, y: event.clientY };
+          origin = { ...frameState.transform };
+          frame.setPointerCapture(event.pointerId);
+        });
+
+        frame.addEventListener("pointermove", (event) => {
+          if (!isDragging) return;
+          const dx = event.clientX - start.x;
+          const dy = event.clientY - start.y;
+          frameState.transform.x = origin.x + dx;
+          frameState.transform.y = origin.y + dy;
+          applyTransform(id);
+        });
+
+        frame.addEventListener("pointerup", (event) => {
+          if (!isDragging) return;
+          isDragging = false;
+          frame.classList.remove("dragging");
+          frame.releasePointerCapture(event.pointerId);
+          updateOutput();
+        });
+
+        frameState.zoomInput.addEventListener("input", () => {
+          frameState.transform.scale = Number(frameState.zoomInput.value);
+          frameState.zoomValue.textContent = frameState.transform.scale.toFixed(2);
+          applyTransform(id);
+          updateOutput();
+        });
+      }
+
+      function applyTransform(id) {
+        const frameState = state.frames[id];
+        const { x, y, scale } = frameState.transform;
+        frameState.img.style.transform = `translate(${x}px, ${y}px) scale(${scale})`;
+      }
+
+      function setImage(url, width, height) {
+        state.imageUrl = url;
+        state.natural = { w: width, h: height };
+        Object.values(state.frames).forEach((frameState) => {
+          frameState.img.src = url;
+          frameState.transform = { x: 0, y: 0, scale: 1 };
+          frameState.zoomInput.value = "1";
+          frameState.zoomValue.textContent = "1.00";
+          applyTransform(frameState.config.id);
+        });
+        updateOutput();
+        updatePreview();
+      }
+
+      function computeCrop(id) {
+        const frameState = state.frames[id];
+        const frameRect = frameState.frame.getBoundingClientRect();
+        const { w, h } = state.natural;
+        const { x, y, scale } = frameState.transform;
+        const displayW = w * scale;
+        const displayH = h * scale;
+
+        const x1 = Math.max(0, (-x) / scale);
+        const y1 = Math.max(0, (-y) / scale);
+        const x2 = Math.min(w, (frameRect.width - x) / scale);
+        const y2 = Math.min(h, (frameRect.height - y) / scale);
+
+        return {
+          x1: x1 / w,
+          y1: y1 / h,
+          x2: x2 / w,
+          y2: y2 / h,
+          debug: { displayW, displayH },
+        };
+      }
+
+      function updateOutput() {
+        if (!state.imageUrl) {
+          outputEl.value = "";
+          suffixPreview.textContent = "";
+          return;
+        }
+        const data = {};
+        framesConfig.forEach((config) => {
+          data[config.id] = computeCrop(config.id);
+        });
+        outputEl.value = JSON.stringify(data, null, 2);
+        console.log("Crop data", data);
+        updateSuffix(data);
+        updatePreview();
+      }
+
+      function lerp(a, b, t) {
+        return a + (b - a) * t;
+      }
+
+      function interpolateCrop(ratio) {
+        const ordered = framesConfig;
+        const lower = [...ordered].reverse().find((r) => r.ratio <= ratio) || ordered[0];
+        const upper = ordered.find((r) => r.ratio >= ratio) || ordered[ordered.length - 1];
+        if (lower.id === upper.id) {
+          return computeCrop(lower.id);
+        }
+        const t = (ratio - lower.ratio) / (upper.ratio - lower.ratio);
+        const lowerCrop = computeCrop(lower.id);
+        const upperCrop = computeCrop(upper.id);
+        return {
+          x1: lerp(lowerCrop.x1, upperCrop.x1, t),
+          y1: lerp(lowerCrop.y1, upperCrop.y1, t),
+          x2: lerp(lowerCrop.x2, upperCrop.x2, t),
+          y2: lerp(lowerCrop.y2, upperCrop.y2, t),
+        };
+      }
+
+      function updatePreview() {
+        if (!state.imageUrl) {
+          previewFrame.innerHTML = "";
+          return;
+        }
+
+        const ratio = Number(ratioSlider.value);
+        ratioLabel.textContent = ratio.toFixed(2);
+        previewFrame.style.aspectRatio = ratio;
+
+        const crop = interpolateCrop(ratio);
+        const img = document.createElement("img");
+        img.src = state.imageUrl;
+        img.alt = "";
+
+        const { w, h } = state.natural;
+        const cropW = (crop.x2 - crop.x1) * w;
+        const cropH = (crop.y2 - crop.y1) * h;
+        const scale = previewFrame.clientWidth / cropW;
+        const offsetX = -crop.x1 * w * scale;
+        const offsetY = -crop.y1 * h * scale;
+
+        img.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(${scale})`;
+
+        previewFrame.innerHTML = "";
+        previewFrame.appendChild(img);
+      }
+
+      function quantize(value) {
+        const clamped = Math.min(1, Math.max(0, value));
+        return Math.round(clamped * QUANT_MAX);
+      }
+
+      function dequantize(value) {
+        return value / QUANT_MAX;
+      }
+
+      function packValues(values) {
+        let bits = 0;
+        let bitBuffer = 0;
+        const bytes = [];
+        values.forEach((val) => {
+          bitBuffer = (bitBuffer << QUANT_BITS) | val;
+          bits += QUANT_BITS;
+          while (bits >= 8) {
+            bits -= 8;
+            const byte = (bitBuffer >> bits) & 0xff;
+            bytes.push(byte);
+          }
+        });
+        if (bits > 0) {
+          bytes.push((bitBuffer << (8 - bits)) & 0xff);
+        }
+        return new Uint8Array(bytes);
+      }
+
+      function unpackValues(bytes, count) {
+        let bits = 0;
+        let bitBuffer = 0;
+        const values = [];
+        for (let i = 0; i < bytes.length; i += 1) {
+          bitBuffer = (bitBuffer << 8) | bytes[i];
+          bits += 8;
+          while (bits >= QUANT_BITS && values.length < count) {
+            bits -= QUANT_BITS;
+            const value = (bitBuffer >> bits) & QUANT_MAX;
+            values.push(value);
+          }
+        }
+        return values;
+      }
+
+      function base64UrlEncode(bytes) {
+        let binary = "";
+        bytes.forEach((byte) => {
+          binary += String.fromCharCode(byte);
+        });
+        return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+      }
+
+      function base64UrlDecode(token) {
+        const padded = token.replace(/-/g, "+").replace(/_/g, "/") + "===".slice((token.length + 3) % 4);
+        const binary = atob(padded);
+        const bytes = new Uint8Array(binary.length);
+        for (let i = 0; i < binary.length; i += 1) {
+          bytes[i] = binary.charCodeAt(i);
+        }
+        return bytes;
+      }
+
+      function encodeCropData(data) {
+        const values = [];
+        framesConfig.forEach((config) => {
+          const crop = data[config.id];
+          values.push(quantize(crop.x1), quantize(crop.y1), quantize(crop.x2), quantize(crop.y2));
+        });
+        const bytes = packValues(values);
+        return base64UrlEncode(bytes);
+      }
+
+      function decodeCropToken(token) {
+        const bytes = base64UrlDecode(token);
+        const values = unpackValues(bytes, framesConfig.length * 4);
+        if (values.length !== framesConfig.length * 4) return null;
+        const data = {};
+        framesConfig.forEach((config, idx) => {
+          const base = idx * 4;
+          data[config.id] = {
+            x1: dequantize(values[base]),
+            y1: dequantize(values[base + 1]),
+            x2: dequantize(values[base + 2]),
+            y2: dequantize(values[base + 3]),
+          };
+        });
+        return data;
+      }
+
+      function updateSuffix(data) {
+        const token = encodeCropData(data);
+        const baseName = filenameBase.value.trim() || "image.jpg";
+        const dotIndex = baseName.lastIndexOf(".");
+        const name = dotIndex > 0 ? baseName.slice(0, dotIndex) : baseName;
+        const ext = dotIndex > 0 ? baseName.slice(dotIndex) : "";
+        const suffix = `${CROP_PREFIX}${token}`;
+        const filename = `${name}${suffix}${ext}`;
+        suffixPreview.textContent = `Suffix: ${suffix} — Filename: ${filename}`;
+        suffixPreview.dataset.suffix = suffix;
+        suffixPreview.dataset.filename = filename;
+      }
+
+      function applyCropToFrame(configId, crop) {
+        const frameState = state.frames[configId];
+        const frameRect = frameState.frame.getBoundingClientRect();
+        const { w, h } = state.natural;
+        const cropW = (crop.x2 - crop.x1) * w;
+        const cropH = (crop.y2 - crop.y1) * h;
+        if (cropW <= 0 || cropH <= 0) return;
+        const scale = frameRect.width / cropW;
+        const x = -crop.x1 * w * scale;
+        const y = -crop.y1 * h * scale;
+        frameState.transform = { x, y, scale };
+        frameState.zoomInput.value = scale.toFixed(2);
+        frameState.zoomValue.textContent = scale.toFixed(2);
+        applyTransform(configId);
+      }
+
+      document.getElementById("imageInput").addEventListener("change", (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+        const url = URL.createObjectURL(file);
+        filenameBase.value = file.name;
+        const img = new Image();
+        img.onload = () => {
+          setImage(url, img.naturalWidth, img.naturalHeight);
+          const tokenMatch = file.name.match(new RegExp(`${CROP_PREFIX}([A-Za-z0-9_-]+)`));
+          if (tokenMatch) {
+            const decoded = decodeCropToken(tokenMatch[1]);
+            if (decoded) {
+              framesConfig.forEach((config) => applyCropToFrame(config.id, decoded[config.id]));
+              updateOutput();
+            }
+          }
+        };
+        img.src = url;
+      });
+
+      ratioSlider.addEventListener("input", updatePreview);
+
+      copyBtn.addEventListener("click", () => {
+        navigator.clipboard.writeText(outputEl.value || "");
+      });
+
+      copySuffixBtn.addEventListener("click", () => {
+        navigator.clipboard.writeText(suffixPreview.dataset.suffix || "");
+      });
+
+      copyFilenameBtn.addEventListener("click", () => {
+        navigator.clipboard.writeText(suffixPreview.dataset.filename || "");
+      });
+
+      resetBtn.addEventListener("click", () => {
+        Object.values(state.frames).forEach((frameState) => {
+          frameState.transform = { x: 0, y: 0, scale: 1 };
+          frameState.zoomInput.value = "1";
+          frameState.zoomValue.textContent = "1.00";
+          applyTransform(frameState.config.id);
+        });
+        updateOutput();
+      });
+
+      framesConfig.forEach(createFrameCard);
+      filenameBase.addEventListener("input", updateOutput);
+    </script>
+  </body>
+</html>
