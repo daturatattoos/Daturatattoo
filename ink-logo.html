@@ -1,0 +1,397 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Appointment-Only Tattoo Artist</title>
+    <script src="https://cdn.jsdelivr.net/npm/snapsvg@0.5.1/dist/snap.svg-min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Manrope:wght@300;400;500&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      :root {
+        color-scheme: light;
+      }
+
+      body {
+        font-family: "Manrope", system-ui, sans-serif;
+        background: #f6efe5;
+        color: #1a1a1a;
+      }
+
+      h1,
+      h2,
+      h3 {
+        font-family: "Fraunces", "Times New Roman", serif;
+      }
+
+      .ink-stencil {
+        fill: none;
+        stroke: #7d6cff;
+        stroke-width: 4;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        opacity: 0.35;
+      }
+
+      .skin-panel {
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.5), rgba(244, 232, 219, 0.95));
+      }
+    </style>
+  </head>
+  <body class="min-h-screen">
+    <header class="px-6 pt-8 pb-6">
+      <div class="mx-auto flex max-w-6xl items-center justify-between">
+        <div class="text-sm uppercase tracking-[0.2em] text-neutral-600">Appointment Only</div>
+        <nav class="hidden gap-6 text-sm text-neutral-600 md:flex">
+          <a href="#portfolio" class="hover:text-neutral-900">Portfolio</a>
+          <a href="#booking" class="hover:text-neutral-900">Booking</a>
+          <a href="#about" class="hover:text-neutral-900">About</a>
+          <a href="crop-tool.html" class="hover:text-neutral-900">Crop Tool</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="px-6 pb-16">
+      <section class="mx-auto grid max-w-6xl gap-8 md:grid-cols-[1.1fr,0.9fr]">
+        <div class="space-y-6">
+          <div class="inline-flex items-center gap-3 rounded-full border border-neutral-200 bg-white/70 px-4 py-2 text-xs uppercase tracking-[0.18em] text-neutral-600">
+            Private studio · by appointment
+          </div>
+          <h1 class="text-4xl leading-tight md:text-5xl">
+            Deliberate, art-first tattooing with a calm, private experience.
+          </h1>
+          <p class="max-w-xl text-base text-neutral-600 md:text-lg">
+            Each piece is designed and executed with intention. Bookings are limited, and every tattoo
+            starts with a collaborative design conversation.
+          </p>
+          <div class="flex flex-wrap gap-4">
+            <a
+              href="#booking"
+              class="rounded-full bg-neutral-900 px-6 py-3 text-sm uppercase tracking-[0.18em] text-neutral-100"
+            >
+              Booking Info
+            </a>
+            <a
+              href="#portfolio"
+              class="rounded-full border border-neutral-300 px-6 py-3 text-sm uppercase tracking-[0.18em] text-neutral-700"
+            >
+              View Portfolio
+            </a>
+          </div>
+          <div class="grid gap-4 pt-6 text-sm text-neutral-600 sm:grid-cols-2">
+            <div class="rounded-2xl border border-neutral-200 bg-white/60 p-4">
+              <div class="text-xs uppercase tracking-[0.18em] text-neutral-500">Studio</div>
+              <div class="mt-2 text-neutral-800">By appointment only · No walk-ins</div>
+            </div>
+            <div class="rounded-2xl border border-neutral-200 bg-white/60 p-4">
+              <div class="text-xs uppercase tracking-[0.18em] text-neutral-500">Focus</div>
+              <div class="mt-2 text-neutral-800">Custom pieces · Minimal flash</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="skin-panel rounded-3xl border border-neutral-200 p-4 shadow-lg">
+          <svg
+            id="tattooSvg"
+            viewBox="0 0 600 360"
+            class="h-[360px] w-full"
+            role="img"
+            aria-label="Tattoo stipple animation"
+          >
+            <path
+              class="inkStroke ink-stencil"
+              data-order="1"
+              d="M300 90
+                 C330 70 370 90 365 130
+                 C400 120 430 150 410 185
+                 C450 190 450 230 415 245
+                 C430 280 400 310 365 295
+                 C370 335 330 350 300 320
+                 C270 350 230 335 235 295
+                 C200 310 170 280 185 245
+                 C150 230 150 190 190 185
+                 C170 150 200 120 235 130
+                 C230 90 270 70 300 90"
+            />
+            <path
+              class="inkStroke ink-stencil"
+              data-order="2"
+              d="M420 250
+                 C470 250 505 290 500 330
+                 C495 355 470 350 455 330
+                 C440 310 420 290 400 290
+                 C380 290 360 310 345 330
+                 C330 350 305 355 300 330
+                 C295 290 330 250 380 250"
+            />
+          </svg>
+          <div class="flex items-center justify-between pt-4 text-xs uppercase tracking-[0.18em] text-neutral-500">
+            <span>Ink in progress</span>
+            <button
+              id="replayBtn"
+              type="button"
+              class="rounded-full border border-neutral-300 bg-white/70 px-4 py-2 text-[11px] uppercase tracking-[0.18em] text-neutral-700"
+            >
+              Replay
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <section id="portfolio" class="mx-auto mt-16 max-w-6xl">
+        <div class="flex flex-wrap items-end justify-between gap-4">
+          <h2 class="text-3xl">Selected Work</h2>
+          <p class="max-w-xl text-sm text-neutral-600">
+            A focused collection of healed and fresh pieces. Each design is custom and tailored to the
+            wearer.
+          </p>
+        </div>
+        <div class="mt-6 grid gap-6 md:grid-cols-3">
+          <div class="rounded-3xl border border-neutral-200 bg-white/70 p-4">
+            <div class="h-52 rounded-2xl bg-gradient-to-br from-neutral-200 via-neutral-100 to-white"></div>
+            <div class="mt-4 text-sm uppercase tracking-[0.18em] text-neutral-500">Fine line</div>
+            <div class="mt-2 text-base">Botanical study</div>
+          </div>
+          <div class="rounded-3xl border border-neutral-200 bg-white/70 p-4">
+            <div class="h-52 rounded-2xl bg-gradient-to-br from-neutral-200 via-neutral-100 to-white"></div>
+            <div class="mt-4 text-sm uppercase tracking-[0.18em] text-neutral-500">Ornamental</div>
+            <div class="mt-2 text-base">Geometric flow</div>
+          </div>
+          <div class="rounded-3xl border border-neutral-200 bg-white/70 p-4">
+            <div class="h-52 rounded-2xl bg-gradient-to-br from-neutral-200 via-neutral-100 to-white"></div>
+            <div class="mt-4 text-sm uppercase tracking-[0.18em] text-neutral-500">Blackwork</div>
+            <div class="mt-2 text-base">Mythic vignette</div>
+          </div>
+        </div>
+      </section>
+
+      <section id="booking" class="mx-auto mt-16 max-w-6xl grid gap-8 md:grid-cols-[1.1fr,0.9fr]">
+        <div class="rounded-3xl border border-neutral-200 bg-white/70 p-6">
+          <h2 class="text-3xl">Booking Instructions</h2>
+          <p class="mt-3 text-sm text-neutral-600">
+            Appointments are limited. Please review the process before reaching out.
+          </p>
+          <ol class="mt-6 space-y-4 text-sm text-neutral-700">
+            <li>Send a brief description of your idea, placement, and size.</li>
+            <li>Include reference images or mood notes if helpful.</li>
+            <li>Availability is discussed after initial review.</li>
+            <li>Deposits secure your session date.</li>
+          </ol>
+          <div class="mt-6 flex flex-wrap gap-4">
+            <a
+              href="mailto:hello@studio.com"
+              class="rounded-full bg-neutral-900 px-6 py-3 text-xs uppercase tracking-[0.18em] text-neutral-100"
+            >
+              Email Inquiry
+            </a>
+            <a
+              href="#"
+              class="rounded-full border border-neutral-300 px-6 py-3 text-xs uppercase tracking-[0.18em] text-neutral-700"
+            >
+              Booking Form (Optional)
+            </a>
+          </div>
+        </div>
+
+        <div class="rounded-3xl border border-neutral-200 bg-white/70 p-6" id="about">
+          <div class="text-xs uppercase tracking-[0.18em] text-neutral-500">About</div>
+          <h2 class="mt-3 text-3xl">Artist bio</h2>
+          <p class="mt-4 text-sm text-neutral-600">
+            A private studio focused on custom botanical, ornamental, and fine-line work. Each tattoo is
+            built with care, collaboration, and a commitment to longevity.
+          </p>
+          <div class="mt-6 space-y-3 text-sm text-neutral-700">
+            <div>Location: City, State</div>
+            <div>Instagram: @artistname</div>
+            <div>Appointments: Limited seasonal openings</div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="border-t border-neutral-200 px-6 py-8 text-sm text-neutral-500">
+      <div class="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4">
+        <div>© 2026 Tattoo Studio</div>
+        <div>Private studio · No walk-ins · Custom work only</div>
+      </div>
+    </footer>
+
+    <script>
+      const svg = Snap("#tattooSvg");
+      const pathNodes = Array.from(document.querySelectorAll("#tattooSvg .inkStroke"));
+      const replayBtn = document.getElementById("replayBtn");
+
+      const DOT_STEP_PX = 2.0;
+      const DOT_RADIUS_RANGE = [0.7, 1.4];
+      const JITTER_PX = 0.4;
+      const BURST_RANGE = [2, 6];
+      const PAUSE_RANGE = [40, 120];
+      const PAUSE_EVERY_RANGE = [20, 60];
+      const DOT_OPACITY = 0.8;
+      const DOT_COLOR = "#f7b7d2";
+      const STENCIL_COLOR = "#7d6cff";
+      const TARGET_COLOR = "#111";
+      const COLOR_FADE_MS = 1100;
+      const SPEED_DOTS_PER_FRAME = 2;
+
+      let activeGroups = [];
+      let animationHandle = null;
+      let animationToken = 0;
+      let pauseTimeouts = [];
+
+      function randBetween(min, max) {
+        return min + Math.random() * (max - min);
+      }
+
+      function randInt(min, max) {
+        return Math.floor(randBetween(min, max + 1));
+      }
+
+      function clearExistingDots() {
+        activeGroups.forEach((group) => group.remove());
+        activeGroups = [];
+        if (animationHandle) {
+          cancelAnimationFrame(animationHandle);
+          animationHandle = null;
+        }
+        pauseTimeouts.forEach((timeoutId) => clearTimeout(timeoutId));
+        pauseTimeouts = [];
+      }
+
+      function buildDots(pathNode, showAll = false) {
+        const totalLength = pathNode.getTotalLength();
+        const parent = Snap(pathNode.parentNode);
+        const dotGroup = parent.group();
+        const pathTransform = pathNode.getAttribute("transform");
+        if (pathTransform) {
+          dotGroup.attr({ transform: pathTransform });
+        }
+        const dots = [];
+        for (let length = 0; length <= totalLength; length += DOT_STEP_PX) {
+          const point = pathNode.getPointAtLength(length);
+          const jitterX = randBetween(-JITTER_PX, JITTER_PX);
+          const jitterY = randBetween(-JITTER_PX, JITTER_PX);
+          const radius = randBetween(DOT_RADIUS_RANGE[0], DOT_RADIUS_RANGE[1]);
+          const dot = svg.circle(point.x + jitterX, point.y + jitterY, radius);
+          dot.attr({ fill: DOT_COLOR, opacity: showAll ? DOT_OPACITY : 0 });
+          dot.node.style.transition = `fill ${COLOR_FADE_MS}ms ease-in-out`;
+          dotGroup.add(dot);
+          dots.push(dot);
+        }
+        activeGroups.push(dotGroup);
+        return { dotGroup, dots };
+      }
+
+      function animateDotColor(dot) {
+        dot.attr({ fill: TARGET_COLOR });
+      }
+
+      function animatePath(pathNode, token) {
+        return new Promise((resolve) => {
+          const { dotGroup, dots } = buildDots(pathNode);
+          let dotIndex = 0;
+          let dotsSincePause = 0;
+          let dotsUntilPause = randInt(PAUSE_EVERY_RANGE[0], PAUSE_EVERY_RANGE[1]);
+          let phase = randBetween(0, Math.PI * 2);
+
+          const tick = () => {
+            if (token !== animationToken) {
+              resolve();
+              return;
+            }
+
+            const burstSize = randInt(BURST_RANGE[0], BURST_RANGE[1]);
+            for (
+              let i = 0;
+              i < Math.max(SPEED_DOTS_PER_FRAME, burstSize) && dotIndex < dots.length;
+              i += 1
+            ) {
+              const dot = dots[dotIndex];
+              dot.attr({ opacity: DOT_OPACITY });
+              animateDotColor(dot);
+              dotIndex += 1;
+              dotsSincePause += 1;
+            }
+
+            phase += 0.25;
+            const jitterX = Math.cos(phase) * 0.6;
+            const jitterY = Math.sin(phase * 1.3) * 0.6;
+            dotGroup.attr({ transform: `translate(${jitterX}, ${jitterY})` });
+
+            if (dotsSincePause >= dotsUntilPause && dotIndex < dots.length) {
+              const pauseFor = randInt(PAUSE_RANGE[0], PAUSE_RANGE[1]);
+              dotsSincePause = 0;
+              dotsUntilPause = randInt(PAUSE_EVERY_RANGE[0], PAUSE_EVERY_RANGE[1]);
+              const timeoutId = setTimeout(() => {
+                if (token !== animationToken) {
+                  resolve();
+                  return;
+                }
+                animationHandle = requestAnimationFrame(tick);
+              }, pauseFor);
+              pauseTimeouts.push(timeoutId);
+              return;
+            }
+
+            if (dotIndex < dots.length) {
+              animationHandle = requestAnimationFrame(tick);
+            } else {
+              requestAnimationFrame(() => {
+                Snap(pathNode).attr({ opacity: 1, stroke: TARGET_COLOR });
+                dotGroup.attr({ opacity: DOT_OPACITY });
+                resolve();
+              });
+            }
+          };
+
+          animationHandle = requestAnimationFrame(tick);
+        });
+      }
+
+      function preparePaths() {
+        pathNodes.forEach((node) => {
+          const snapNode = Snap(node);
+          snapNode.attr({ opacity: 0.35, strokeWidth: 0.8, stroke: STENCIL_COLOR });
+          node.style.transition =
+            "opacity 900ms ease-in-out, stroke-width 900ms ease-in-out, stroke 700ms ease-in-out";
+        });
+      }
+
+      function reducedMotionFallback() {
+        clearExistingDots();
+        pathNodes.forEach((node) => {
+          const snapNode = Snap(node);
+          snapNode.attr({ opacity: 1, stroke: TARGET_COLOR });
+        });
+      }
+
+      function runAnimation() {
+        clearExistingDots();
+        animationToken += 1;
+        preparePaths();
+
+        const orderedPaths = [...pathNodes].sort((a, b) => {
+          const orderA = Number(a.dataset.order || 0);
+          const orderB = Number(b.dataset.order || 0);
+          return orderA - orderB;
+        });
+
+        orderedPaths
+          .reduce((chain, node) => chain.then(() => animatePath(node, animationToken)), Promise.resolve())
+          .catch(() => {});
+      }
+
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        reducedMotionFallback();
+      } else {
+        replayBtn.addEventListener("click", runAnimation);
+        runAnimation();
+      }
+    </script>
+  </body>
+</html>
