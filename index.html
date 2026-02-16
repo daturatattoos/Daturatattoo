@@ -178,7 +178,8 @@
             <a href="#home">Home</a>
             <a href="#portfolio">Portfolio</a>
             <a href="#faq">FAQ</a>
-            <a href="#book">Book</a>
+            <a href="https://docs.google.com/forms/d/e/1FAIpQLSdW9RKm69JnvuK87Z0IF9MHei7j87ByLYUariCJ19WqiHfSEA/viewform?usp=header" target="_blank" rel="noopener">Book</a>
+            <a href="https://www.instagram.com/datura_tattoo_/" target="_blank" rel="noopener">Instagram</a>
         </nav>
     </div>
 </header>
@@ -188,8 +189,12 @@
     <p>
         Fine line, botanical, illustrative and custom designs.
         A private and intentional tattoo experience.
+        <br><br>
+        <span style="color: var(--muted); font-size: 0.95rem;">
+            Follow: <a href="https://www.instagram.com/datura_tattoo_/" target="_blank" rel="noopener" style="color: var(--text); text-decoration: underline;">@datura_tattoo_</a>
+        </span>
     </p>
-    <a href="#book" class="btn">Book a Tattoo</a>
+    <a href="https://docs.google.com/forms/d/e/1FAIpQLSdW9RKm69JnvuK87Z0IF9MHei7j87ByLYUariCJ19WqiHfSEA/viewform?usp=header" target="_blank" rel="noopener" class="btn">Book a Tattoo</a>
 </section>
 
 <section id="portfolio" class="page">
@@ -209,7 +214,7 @@
 
     <div class="faq-item">
         <h3>How do I book a tattoo?</h3>
-        <p>Use the booking section below and include reference images, size, placement, and preferred dates.</p>
+        <p>Use the Book link in the navigation to submit a request (it opens the form in a new tab). Include reference images, size, placement, and preferred dates.</p>
     </div>
 
     <div class="faq-item">
@@ -234,11 +239,11 @@
 </section>
 
 <section id="book" class="page">
-    <h2>Book</h2>
+    <h2>Contact</h2>
 
     <div style="max-width: 600px; margin: 0 auto; text-align: center;">
         <p style="color: var(--muted); margin-bottom: 2rem;">
-            Submit a booking request using the form link below.
+            For booking requests, use the Book link in the navigation (it opens the request form in a new tab). For questions, email below.
         </p>
 
         <a href="https://docs.google.com/forms/d/e/1FAIpQLSdW9RKm69JnvuK87Z0IF9MHei7j87ByLYUariCJ19WqiHfSEA/viewform?usp=header"
@@ -249,18 +254,18 @@
         </a>
 
         <p style="color: var(--muted); margin-top: 2rem; font-size: 0.9rem;">
-            Prefer email? <a href="mailto:datura.tattoos@gmail.com" style="color: var(--text); text-decoration: underline;">booking@daturatattoo.com</a>
+            Prefer email? <a href="mailto:datura.tattoos@gmail.com" style="color: var(--text); text-decoration: underline;">datura.tattoos@gmail.com</a>
         </p>
     </div>
 </section>
 
 <footer>
-    © 2026 Datura Tattoo
+    © 2026 Datura Tattoo · <a href="https://www.instagram.com/datura_tattoo_/" target="_blank" rel="noopener" style="color: inherit; text-decoration: underline;">Instagram</a>
 </footer>
 
 <script>
     (function () {
-        const pageIds = ["home", "portfolio", "faq", "book"];
+        const pageIds = ["home", "portfolio", "faq", "book"]; // keep #book as a valid hash page
 
         function setActivePage(id) {
             if (!pageIds.includes(id)) id = "home";
